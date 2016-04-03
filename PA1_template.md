@@ -91,6 +91,7 @@ text(x = 0,y=mean(total_day$total_steps),pos=1,labels = "mean",col="black")
 ```
 
 ![](PA1_template_files/figure-html/barplot-1.png)
+(PA1_template_files/figure-html/barplot-1.png)
 
 ####  2. Make a histogram of the total number of steps taken each day
 
@@ -108,6 +109,7 @@ legend(legend="median","topright",lty=3,lwd=2,bty = "n")
 ```
 
 ![](PA1_template_files/figure-html/histogram-1.png)
+(PA1_template_files/figure-html/histogram-1.png)
 
 #### 3. Calculate and report the mean and median of the total number of steps taken per day
 
@@ -140,6 +142,7 @@ at = seq_along(daily_patterns$interval)[seq(1,288,12)])
 ```
 
 ![](PA1_template_files/figure-html/daily-1.png)
+(PA1_template_files/figure-html/daily-1.png)
 
 #### 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
@@ -243,6 +246,7 @@ summary(total_day_noNAs$total_steps)
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 ##      41    9819   10770   10770   12810   21190
 ```
+(PA1_template_files/figure-html/histogram_no_NAs-1.png)
 
 Including NAs should affect the final results, our mean increased its value while median decreased.
 Missing values always affect mean & median. (Note: Don't confuse a missing value with a zero value)
@@ -291,3 +295,4 @@ qplot(interval,average,data=daily_patterns,geom="line",facets=day~.)
 ```
 
 ![](PA1_template_files/figure-html/weekend_comparison-1.png)
+(PA1_template_files/figure-html/weekend_comparison-1.png)
