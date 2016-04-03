@@ -8,7 +8,6 @@ output:
 
 ## Loading and preprocessing the data
 First, unzip the source file in your Working Directory.
-  First, unzip the source file in your Working Directory.
 
 ```{r unzip, cache=TRUE}
 unzip("activity.zip")
