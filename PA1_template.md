@@ -3,15 +3,16 @@
 
 ## Loading and preprocessing the data
 First, unzip the source file in your Working Directory.
+  First, unzip the source file in your Working Directory.
 
 
 ```r
-unzip("activity.zip",exdir = "data")
+unzip("activity.zip")
 ```
 Read the source csv file (activity) into  data frame and show some rows.
 
 ```r
-activity <- read.csv("data/activity.csv", stringsAsFactors=FALSE)
+activity <- read.csv("activity.csv", stringsAsFactors=FALSE)
 str(activity)
 ```
 
@@ -22,13 +23,14 @@ str(activity)
 ##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
 ```
 
-Convert variable date to a Date format using lubridate package. Install this package if you don't have it.
+Convert variable date to a Date format using lubridate package. 
+Install this package if you don't have it.
 
 
 ```r
 if(!require(lubridate)){
-    install.packages("lubridate")
-    library(lubridate)
+install.packages("lubridate")
+library(lubridate)
 }
 activity$date <- ymd(activity$date)
 
@@ -44,12 +46,13 @@ str(activity)
 
 
 ## What is the average daily activity pattern?
+
 #### 1. Calculate the total number of steps taken per day (ignore the missing values)
 
 ```r
 if(!require(dplyr)){
-    install.packages("dplyr")
-    library(dplyr)
+install.packages("dplyr")
+library(dplyr)
 }
 total_day <- activity %>% group_by(date) %>%summarise(total_steps=sum(steps,na.rm=TRUE),na=mean(is.na(steps))) %>% print
 ```
@@ -71,14 +74,19 @@ total_day <- activity %>% group_by(date) %>%summarise(total_steps=sum(steps,na.r
 ## 10 2012-10-10        9900     0
 ## ..        ...         ...   ...
 ```
-Visualise the total number of steps taken per day as a barplot (Package "dplyr" is needed.)
+Visualize the total number of steps per day in a barplot (Package "dplyr" is needed.)
 
 
 ```r
+# Barplot
 barplot(height = total_day$total_steps,names.arg=total_day$date,cex.names=0.68,las=3,col="red")
+
+# Median - Line & Text
 abline(h=median(total_day$total_steps), lty=2,lwd=3, col="black")
-abline(h=mean(total_day$total_steps), lty=2,lwd=3, col="blue")
 text(x = 0,y=median(total_day$total_steps),pos=3,labels = "median")
+
+# Mean - Line & Text
+abline(h=mean(total_day$total_steps), lty=2,lwd=3, col="blue")
 text(x = 0,y=mean(total_day$total_steps),pos=1,labels = "mean",col="black")
 ```
 
@@ -86,11 +94,15 @@ text(x = 0,y=mean(total_day$total_steps),pos=1,labels = "mean",col="black")
 
 ####  2. Make a histogram of the total number of steps taken each day
 
-Days with missing observations does not appear in a Histogram.  
+Days with missing observations does not appear in a Histogram.
+
 
 ```r
+# Histogram
 total_day <- filter(total_day, na < 1)
 hist(total_day$total_steps,col="orange",breaks=20,main="Total steps per day",xlab="Steps per day")
+
+# Median - Line & Text
 abline(v=median(total_day$total_steps),lty=3, lwd=2, col="blue")
 legend(legend="median","topright",lty=3,lwd=2,bty = "n")
 ```
@@ -101,9 +113,9 @@ legend(legend="median","topright",lty=3,lwd=2,bty = "n")
 
 
 ```r
-#Mean
+# Mean
 mean_steps <- mean(total_day$total_steps,na.rm=TRUE)
-#Median
+# Median
 median_steps <- median(total_day$total_steps,na.rm=TRUE)
 ```
 Mean and median of the total number of steps taken per day are 1.076619\times 10^{4} steps and 10765 steps, respectively.
@@ -114,14 +126,17 @@ Mean and median of the total number of steps taken per day are 1.076619\times 10
 
 
 ```r
-#Installation of dplyr was already done before.
+# Installation of dplyr was already done before.
 library(dplyr,quietly = TRUE)
+
 daily_patterns <- activity %>% group_by(interval) %>% summarise(average=mean(steps,na.rm=TRUE))
+
+# Plot
 plot(x = 1:nrow(daily_patterns),y = daily_patterns$average,type = "l",
-     col = "red", xaxt = "n",xlab="Intervals", 
-     ylab = "Average across all days")
+col = "red", xaxt = "n",xlab="Intervals", 
+ylab = "Average across all days")
 axis(1,labels=daily_patterns$interval[seq(1,288,12)],
-     at = seq_along(daily_patterns$interval)[seq(1,288,12)])
+at = seq_along(daily_patterns$interval)[seq(1,288,12)])
 ```
 
 ![](PA1_template_files/figure-html/daily-1.png)
@@ -156,30 +171,30 @@ percentage_na
 ```
 ## [1] 0.1311475
 ```
-Total number of missing values in the dataset amounts to **2304 ** (what is **13.1** % of total observations).
+Missing values amounts to **2304 ** (what is **13.1** % of total observations).
 
 #### 2. Devise a strategy for filling in all of the missing values in the dataset
 
-As the number of missing values in this dataset is fairly large, we cannot be sure if there is no bias introduced by missing values. Therefore we impute missing values based on average number of steps in particular 5-minutes interval. 
+Missing values will be filled by the average number of steps in particular 5-minutes interval.
 
 #### 3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
 ```r
-without_NAs <- numeric(nrow(activity))
+noNAs <- numeric(nrow(activity))
 for (i in 1:nrow(activity))
 {
-        if (is.na(activity[i,"steps"])==TRUE)
-            {
-                    without_NAs[i]<-filter(daily_patterns,interval==activity[i,"interval"]) %>% select(average)
-            } 
-        else
-            {
-                    without_NAs[i]<-activity[i,"steps"]
-            }
-                    
+  if (is.na(activity[i,"steps"])==TRUE)
+  {
+  noNAs[i]<-filter(daily_patterns,interval==activity[i,"interval"]) %>% select(average)
+  } 
+  else
+  {
+  noNAs[i]<-activity[i,"steps"]
+  }
+  
 }
-activity_without_NAs<-mutate(activity,steps_no_NAs=without_NAs)
-head(activity_without_NAs)
+activity_noNAs<-mutate(activity,steps_no_NAs=noNAs)
+head(activity_noNAs)
 ```
 
 ```
@@ -195,7 +210,7 @@ head(activity_without_NAs)
 Impact of NAs   
 
 ```r
-check <- filter(activity_without_NAs,!is.na(steps)) %>% mutate(ok = (steps==steps_no_NAs))
+check <- filter(activity_noNAs,!is.na(steps)) %>% mutate(ok = (steps==steps_no_NAs))
 mean(check$ok)
 ```
 
@@ -207,10 +222,14 @@ mean(check$ok)
 
 
 ```r
-total_day_noNAs <- activity_without_NAs %>% mutate(steps_no_NAs=as.numeric(steps_no_NAs)) %>% group_by(date) %>% summarise(total_steps=sum(steps_no_NAs))
-hist(total_day_noNAs$total_steps,col="blue",breaks=20,main="Total steps per day",xlab="Steps per day")
+total_day_noNAs <- activity_noNAs %>% mutate(steps_no_NAs=as.numeric(steps_no_NAs)) %>% group_by(date) %>% summarise(total_steps=sum(steps_no_NAs))
+
+# Histogram
+hist(total_day_noNAs$total_steps,col="blue",breaks=20,main="Total Steps per day",xlab="Steps Qty")
+
+# Median
 abline(v=median(total_day$total_steps),lty=3, lwd=2, col="black")
-legend(legend="median","topright",lty=3,lwd=2,bty = "n")
+legend(legend="Median","topright",lty=3,lwd=2,bty = "n")
 ```
 
 ![](PA1_template_files/figure-html/histogram_no_NAs-1.png)
@@ -237,20 +256,20 @@ Missing values always affect mean & median. (Note: Don't confuse a missing value
 #Installation of dplyr was already done before.
 library(lubridate)
 is_weekday <-function(date){
-        if(wday(date)%in%c(1,7)) result<-"weekend"
-        else
-                result<-"weekday"
-        result
+  if(wday(date)%in%c(1,7)) result<-"Weekend"
+  else
+    result<-"Weekday"
+  result
 }
 
-activity_without_NAs <- mutate(activity_without_NAs,date=ymd(date)) %>% mutate(day=sapply(date,is_weekday))
+activity_noNAs <- mutate(activity_noNAs,date=ymd(date)) %>% mutate(day=sapply(date,is_weekday))
 
-table(activity_without_NAs$day)
+table(activity_noNAs$day)
 ```
 
 ```
 ## 
-## weekday weekend 
+## Weekday Weekend 
 ##   12960    4608
 ```
 
@@ -259,8 +278,15 @@ table(activity_without_NAs$day)
 
 
 ```r
-library(ggplot2)
-daily_patterns <- activity_without_NAs %>% mutate(day=factor(day,levels=c("weekend","weekday")),steps_no_NAs=as.numeric(steps_no_NAs)) %>% group_by(interval,day) %>% summarise(average=mean(steps_no_NAs))
+# ggplot2 packae is required.
+if(!require(ggplot2)){
+  install.packages("ggplot2")
+  library(ggplot2)
+}
+
+daily_patterns <- activity_noNAs %>% mutate(day=factor(day,levels=c("Weekend","Weekday")),steps_no_NAs=as.numeric(steps_no_NAs)) %>% group_by(interval,day) %>% summarise(average=mean(steps_no_NAs))
+
+# Line chart
 qplot(interval,average,data=daily_patterns,geom="line",facets=day~.)
 ```
 
